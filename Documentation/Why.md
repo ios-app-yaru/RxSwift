@@ -1,6 +1,6 @@
 ## Why
 
-**Rx enables building apps in a declarative way.**
+**Rxは宣言的な方法でアプリケーションを構築できます。**
 
 ### Bindings
 
@@ -10,7 +10,7 @@ Observable.combineLatest(firstName.rx.text, lastName.rx.text) { $0 + " " + $1 }
     .bind(to: greetingLabel.rx.text)
 ```
 
-This also works with `UITableView`s and `UICollectionView`s.
+これは `UITableView`sと` UICollectionView`でも使えます。
 
 ```swift
 viewModel
@@ -22,32 +22,32 @@ viewModel
     .disposed(by: disposeBag)
 ```
 
-**Official suggestion is to always use `.disposed(by: disposeBag)` even though that's not necessary for simple bindings.**
+**正式な提案は、単純バインディングには必要ないのに、常に `.disposed（by：disposeBag） `を使うことです。**
 
 ### Retries
 
-It would be great if APIs wouldn't fail, but unfortunately they do. Let's say there is an API method:
+APIが失敗しないならば大丈夫ですが、残念ながら失敗する可能性があります。 APIメソッドがあるとしましょう：
 
 ```swift
 func doSomethingIncredible(forWho: String) throws -> IncredibleThing
 ```
 
-If you are using this function as it is, it's really hard to do retries in case it fails. Not to mention complexities modeling [exponential backoffs](https://en.wikipedia.org/wiki/Exponential_backoff). Sure it's possible, but the code would probably contain a lot of transient states that you really don't care about, and it wouldn't be reusable.
+この関数をそのまま使用している場合は、失敗した場合に再試行するのは本当に難しいです。複雑なモデリング[指数バックオフ]（https://en.wikipedia.org/wiki/Exponential_backoff）はもちろんです、確かに可能ですが、コードにはおそらく気にしない過渡状態がたくさんあり、再利用できません。 
 
-Ideally, you would want to capture the essence of retrying, and to be able to apply it to any operation.
+理想的には、再試行の本質を捉え、それをどの操作にも適用できるようにするのが理想的です。 
 
-This is how you can do simple retries with Rx
+これは、Rxで単純な再試行を行う方法です
 
 ```swift
 doSomethingIncredible("me")
     .retry(3)
 ```
 
-You can also easily create custom retry operators.
+カスタムリトライ演算子も簡単に作成できます。
 
 ### Delegates
 
-Instead of doing the tedious and non-expressive:
+これはわかりにくい
 
 ```swift
 public func scrollViewDidScroll(scrollView: UIScrollView) { [weak self] // what scroll view is this bound to?
@@ -55,7 +55,7 @@ public func scrollViewDidScroll(scrollView: UIScrollView) { [weak self] // what 
 }
 ```
 
-... write
+... こうかこう
 
 ```swift
 self.resultsTableView
@@ -66,13 +66,13 @@ self.resultsTableView
 
 ### KVO
 
-Instead of:
+これと
 
 ```
 `TickTock` was deallocated while key value observers were still registered with it. Observation info was leaked, and may even become mistakenly attached to some other object.
 ```
 
-and
+これは
 
 ```objc
 -(void)observeValueForKeyPath:(NSString *)keyPath
@@ -81,9 +81,9 @@ and
                       context:(void *)context
 ```
 
-Use [`rx.observe` and `rx.observeWeakly`](GettingStarted.md#kvo)
+これを使いましょう [`rx.observe` and `rx.observeWeakly`](GettingStarted.md#kvo)
 
-This is how they can be used:
+使用例は以下
 
 ```swift
 view.rx.observe(CGRect.self, "frame")
@@ -93,7 +93,7 @@ view.rx.observe(CGRect.self, "frame")
     .disposed(by: disposeBag)
 ```
 
-or
+もしくは
 
 ```swift
 someSuspiciousViewController
@@ -106,14 +106,14 @@ someSuspiciousViewController
 
 ### Notifications
 
-Instead of using:
+これは
 
 ```swift
 @available(iOS 4.0, *)
 public func addObserverForName(name: String?, object obj: AnyObject?, queue: NSOperationQueue?, usingBlock block: (NSNotification) -> Void) -> NSObjectProtocol
 ```
 
-... just write
+こう書けます
 
 ```swift
 NotificationCenter.default
@@ -124,17 +124,18 @@ NotificationCenter.default
 
 ### Transient state
 
-There are also a lot of problems with transient state when writing async programs. A typical example is an autocomplete search box.
+また、非同期プログラムを書くときに過渡状態に多くの問題があります。典型的な例は、オートコンプリート検索ボックスです。
 
-If you were to write the autocomplete code without Rx, the first problem that probably needs to be solved is when `c` in `abc` is typed, and there is a pending request for `ab`, the pending request gets canceled. OK, that shouldn't be too hard to solve, you just create an additional variable to hold reference to the pending request.
+Rxを使わないでオートコンプリートコードを書いていたら、おそらく解決しなければならない最初の問題は `abc`の` c`がタイプされ、 `ab`に対する保留中のリクエストがあるときです。 
+OK、解決するのは難しいことではありません。保留中のリクエストを参照する追加の変数を作成するだけです。
 
-The next problem is if the request fails, you need to do that messy retry logic. But OK, a couple more fields that capture the number of retries that need to be cleaned up.
+次の問題は、リクエストが失敗した場合、その不吉なリトライロジックを行う必要があることです。しかし、OK、クリーンアップする必要がある再試行の回数をキャプチャするいくつかのフィールド。
 
-It would be great if the program would wait for some time before firing a request to the server. After all, we don't want to spam our servers in case somebody is in the process of typing something very long. An additional timer field maybe?
+プログラムがしばらく待ってからサーバーにリクエストを発してしまうといいでしょう。結局のところ、誰かが非常に長い間何かを入力している場合に備えて、私たちはサーバーをスパムしたくありません。追加のタイマーフィールドはおそらく？
 
-There is also a question of what needs to be shown on screen while that search is executing, and also what needs to be shown in case we fail even with all of the retries.
+また、検索が実行されている間に画面上に何を表示する必要があるのか​​、すべての再試行でも失敗した場合に表示する必要があることについての質問があります。
 
-Writing all of this and properly testing it would be tedious. This is that same logic written with Rx.
+これをすべて書き、適切にテストするのは面倒です。これは、Rxで書かれた同じロジックです。
 
 ```swift
 searchTextField.rx.text
@@ -152,19 +153,19 @@ searchTextField.rx.text
     .disposed(by: disposeBag)
 ```
 
-There are no additional flags or fields required. Rx takes care of all that transient mess.
+追加のフラグやフィールドは必要ありません。 Rxはその過渡的な混乱をすべて処理します。
 
 ### Compositional disposal
 
-Let's assume that there is a scenario where you want to display blurred images in a table view. First, the images should be fetched from a URL, then decoded and then blurred.
+テーブルビューでぼやけた画像を表示するシナリオがあるとしましょう。まず、URLからイメージを取り出し、デコードしてからぼかしてください。
 
-It would also be nice if that entire process could be canceled if a cell exits the visible table view area since bandwidth and processor time for blurring are expensive.
+また、ブレンディングのための帯域幅とプロセッサ時間が高価であるため、セルが可視のテーブルビュー領域を出ると、そのプロセス全体がキャンセルされる可能性もあります。
 
-It would also be nice if we didn't just immediately start to fetch an image once the cell enters the visible area since, if user swipes really fast, there could be a lot of requests fired and canceled.
+ユーザーが本当に速くスワップすると、起動され、キャンセルされたリクエストが多いため、セルが可視領域に入るとすぐにイメージを取得するだけでは、すぐに開始しないとよいでしょう。
 
-It would be also nice if we could limit the number of concurrent image operations because, again, blurring images is an expensive operation.
+また、画像をぼかすことは高価な操作であるため、同時の画像操作の数を制限することができればいいと思います。
 
-This is how we can do it using Rx:
+Rxではこうかきます
 
 ```swift
 // this is a conceptual solution
@@ -184,13 +185,15 @@ let imageSubscription = imageURLs
     .disposed(by: reuseDisposeBag)
 ```
 
-This code will do all that and, when `imageSubscription` is disposed, it will cancel all dependent async operations and make sure no rogue image is bound to the UI.
+このコードはすべてのことを行い、 `imageSubscription`が破棄されると、それはすべての従属非同期操作を取り消し、不正な画像がUIにバインドされていないことを確認します。
 
 ### Aggregating network requests
 
-What if you need to fire two requests and aggregate results when they have both finished?
+ネットワーク要求の集約
 
-Well, there is of course the `zip` operator
+両方のリクエストが発生し、両方のリクエストが完了したときに結果を集計する必要がある場合はどうなりますか？
+
+`zip` operatorを使いましょう
 
 ```swift
 let userRequest: Observable<User> = API.getUser("me")
@@ -205,7 +208,7 @@ Observable.zip(userRequest, friendsRequest) { user, friends in
 .disposed(by: disposeBag)
 ```
 
-So what if those APIs return results on a background thread, and binding has to happen on the main UI thread? There is `observeOn`.
+では、これらのAPIがバックグラウンドスレッドで結果を返し、メインUIスレッドでバインディングが発生した場合はどうなりますか？ `observeOn`があります。
 
 ```swift
 let userRequest: Observable<User> = API.getUser("me")
@@ -221,25 +224,25 @@ Observable.zip(userRequest, friendsRequest) { user, friends in
 .disposed(by: disposeBag)
 ```
 
-There are many more practical use cases where Rx really shines.
+Rxが本当に輝く、もっと実用的な使用例がたくさんあります。
 
 ### State
 
-Languages that allow mutation make it easy to access global state and mutate it. Uncontrolled mutations of shared global state can easily cause [combinatorial explosion](https://en.wikipedia.org/wiki/Combinatorial_explosion#Computing).
+突然変異を可能にする言語は、グローバルな状態にアクセスしてそれを突然変異させることを容易にする。共有されたグローバル状態の制御されない突然変異は、[組み合わせの爆発]（https://en.wikipedia.org/wiki/Combinatorial_explosion#Computing）を容易に引き起こす可能性がある。
 
-But on the other hand, when used in a smart way, imperative languages can enable writing more efficient code closer to hardware.
+しかし一方で、スマートな方法で使用される場合、命令型言語はより効率的なコードをハードウェアに近づけることができます。
 
-The usual way to battle combinatorial explosion is to keep state as simple as possible, and use [unidirectional data flows](https://developer.apple.com/videos/play/wwdc2014-229) to model derived data.
+コンビナトリアル爆発に対抗する通常の方法は、状態をできるだけ単純な状態に保ち、[単方向データフロー]（https://developer.apple.com/videos/play/wwdc2014-229）を使用して派生データをモデル化することです。
 
-This is where Rx really shines.
+これはRxが本当に輝く場所です。
 
-Rx is that sweet spot between functional and imperative worlds. It enables you to use immutable definitions and pure functions to process snapshots of mutable state in a reliable composable way.
+Rxは機能的な世界と命令的な世界の間のすばらしい場所です。不変の定義と純粋な関数を使用して、可変状態のスナップショットを信頼性の高い合成可能な方法で処理できます。
 
-So what are some practical examples?
+実際の例は何ですか？
 
 ### Easy integration
 
-What if you need to create your own observable? It's pretty easy. This code is taken from RxCocoa and that's all you need to wrap HTTP requests with `URLSession`
+あなた自身の観測可能物を作成する必要がある場合はどうなりますか？それはかなり簡単です。このコードはRxCocoaから取得したもので、HTTPリクエストを `URLSession`でラップするために必要なものです
 
 ```swift
 extension Reactive where Base: URLSession {
@@ -271,6 +274,8 @@ extension Reactive where Base: URLSession {
 
 ### Benefits
 
+利点
+
 In short, using Rx will make your code:
 
 * Composable <- Because Rx is composition's nickname
@@ -281,20 +286,28 @@ In short, using Rx will make your code:
 * Less stateful <- Because you are modeling applications as unidirectional data flows
 * Without leaks <- Because resource management is easy
 
+- 合成可能 <- 構成物
+- 再利用可能　<- 構成物だから
+- 宣言的 <- データは不変である
+- 簡潔に理解できる　<- 抽象化のレベルを上げ、過渡状態を除去する
+- 安定、堅牢 <- Rx codeはユニットテストかきやすい
+- ステートフルレス <- データフローが単方向性
+- リークがない <- リソースマネジメントが簡単
+
 ### It's not all or nothing
 
-It is usually a good idea to model as much of your application as possible using Rx.
+通常、Rxを使用してできるだけ多くのアプリケーションをモデル化することをお勧めします。
 
-But what if you don't know all of the operators and whether or not there even exists some operator that models your particular case?
+しかし、すべての演算子と、特定のケースをモデル化する演算子が存在するかどうかわからない場合はどうすればよいでしょうか？
 
-Well, all of the Rx operators are based on math and should be intuitive.
+Rx演算子はすべて数学に基づいており、直感的でなければなりません。
 
-The good news is that about 10-15 operators cover most typical use cases. And that list already includes some of the familiar ones like `map`, `filter`, `zip`, `observeOn`, ...
+良いニュースは、約10-15人のオペレータが最も典型的なユースケースをカバーしていることです。そしてそのリストにはすでに `map`、` filter`、 `zip`、` observeOn`などの使い慣れたものがいくつか含まれています。
 
 There is a huge list of [all Rx operators](http://reactivex.io/documentation/operators.html).
 
 For each operator, there is a [marble diagram](http://reactivex.io/documentation/operators/retry.html) that helps to explain how it works.
 
-But what if you need some operator that isn't on that list? Well, you can make your own operator.
+しかし、そのリストにない演算子が必要な場合はどうすればよいでしょうか？あなた自身のオペレータを作ることができます。
 
-What if creating that kind of operator is really hard for some reason, or you have some legacy stateful piece of code that you need to work with? Well, you've got yourself in a mess, but you can [jump out of Rx monads](GettingStarted.md#life-happens) easily, process the data, and return back into it.
+何らかの理由でその種の演算子を作成することが本当に困難な場合、または作業する必要のあるステートフルなコードを残しておくとどうなりますか？さて、あなたは混乱してしまいましたが、あなたは[Rxモナドから飛び出して]簡単にデータを処理して戻すことができます。
